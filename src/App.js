@@ -109,10 +109,6 @@ function fmt(n) {
   return Math.round(num).toLocaleString("ko-KR");
 }
 
-function fmtM(n) {
-  if (!n || typeof n !== "number") return "0";
-  return (n / 10000).toFixed(0) + "만";
-}
 
 function numVal(v) {
   if (v === null || v === undefined || typeof v === "string") return 0;
@@ -124,8 +120,6 @@ export default function App() {
   const [filterManager, setFilterManager] = useState("전체");
   const [filterStatus, setFilterStatus] = useState("전체");
   const [searchText, setSearchText] = useState("");
-  const [activeTab, setActiveTab] = useState("table");
-
   const toggleCheck = (no) => {
     setCheckedIds(prev => ({ ...prev, [no]: !prev[no] }));
   };
@@ -341,16 +335,16 @@ export default function App() {
               <th rowSpan={2} className="th-mgr">담당자</th>
               <th rowSpan={2} className="th-company">업체명</th>
               <th rowSpan={2} className="th-ceo">대표자</th>
-              <th colSpan={2} className="th-group-cell">매출 현황</th>
-              <th colSpan={4} className="th-group-cell th-fee">조정료 (원)</th>
+              <th className="th-group-cell">24년 귀속매출</th>
+              <th className="th-group-cell th-fee">24년 귀속 조정료</th>
+              <th className="th-group-cell">25년 귀속매출</th>
+              <th className="th-group-cell th-fee">★26년 조정료 [최종 VAT]</th>
             </tr>
             <tr>
-              <th className="th-rev">24년 귀속매출</th>
-              <th className="th-rev">25년 귀속매출</th>
-              <th className="th-fee-item">24년 귀속<br/>조정료</th>
-              <th className="th-fee-item">25년 귀속<br/>조정료[보수표]</th>
-              <th className="th-fee-item">26년 조정료<br/>[공급가]</th>
-              <th className="th-fee-item highlight">★26년 조정료<br/>[최종 VAT]</th>
+              <th className="th-rev">(원)</th>
+              <th className="th-fee-item">(원)</th>
+              <th className="th-rev">(원)</th>
+              <th className="th-fee-item highlight">(VAT 포함)</th>
             </tr>
           </thead>
           <tbody>
@@ -380,10 +374,8 @@ export default function App() {
                   <td className="td-company">{d.company}</td>
                   <td className="td-ceo">{d.ceo}</td>
                   <td className="td-num">{fmt(d.rev2024)}</td>
-                  <td className="td-num">{fmt(d.rev2025)}</td>
                   <td className="td-num">{fmt(d.fee2024)}</td>
-                  <td className="td-num">{fmt(d.fee2025base)}</td>
-                  <td className="td-num">{fmt(d.fee2026)}</td>
+                  <td className="td-num">{fmt(d.rev2025)}</td>
                   <td className={`td-num td-vat ${isChecked ? "td-paid" : ""}`}>
                     {fmt(d.fee2026vat)}
                     {isChecked && <span className="paid-badge">입금</span>}
@@ -396,20 +388,18 @@ export default function App() {
             <tr className="tf-row">
               <td colSpan={5} className="tf-label">합 계 ({filteredData.length}개)</td>
               <td className="tf-num">{fmt(filteredData.reduce((s,d)=>s+numVal(d.rev2024),0))}</td>
-              <td className="tf-num">{fmt(filteredData.reduce((s,d)=>s+numVal(d.rev2025),0))}</td>
               <td className="tf-num">{fmt(filteredData.reduce((s,d)=>s+numVal(d.fee2024),0))}</td>
-              <td className="tf-num">{fmt(filteredData.reduce((s,d)=>s+numVal(d.fee2025base),0))}</td>
-              <td className="tf-num">{fmt(filteredData.reduce((s,d)=>s+numVal(d.fee2026),0))}</td>
+              <td className="tf-num">{fmt(filteredData.reduce((s,d)=>s+numVal(d.rev2025),0))}</td>
               <td className="tf-num tf-vat">{fmt(filteredData.reduce((s,d)=>s+numVal(d.fee2026vat),0))}</td>
             </tr>
             <tr className="tf-row tf-checked">
               <td colSpan={5} className="tf-label">입금 확인 합계 ({filteredData.filter(d=>checkedIds[d.no]).length}개)</td>
-              <td colSpan={5}></td>
+              <td colSpan={3}></td>
               <td className="tf-num tf-vat paid-text">{fmt(checkedTotal)}</td>
             </tr>
             <tr className="tf-row tf-unpaid">
               <td colSpan={5} className="tf-label">미입금 합계 ({filteredData.filter(d=>!checkedIds[d.no]).length}개)</td>
-              <td colSpan={5}></td>
+              <td colSpan={3}></td>
               <td className="tf-num tf-vat unpaid-text">{fmt(grandTotal - checkedTotal)}</td>
             </tr>
           </tfoot>
